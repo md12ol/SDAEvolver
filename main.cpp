@@ -4,12 +4,21 @@
 using namespace std;
 
 int main() {
-    SDA tom(10, 3, 2, 20);
-    vector<int> tomsOpinions;
-    tomsOpinions.reserve(20);
+    int outputLen = 20;
 
-    tom.fillOutput(tomsOpinions, true, cout);
+    SDA firstSDA(10, 3, 2, outputLen);
+    SDA secondSDA(10, 3, 2, outputLen);
+    vector<int> firstOutput;
+    vector<int> secondOutput;
+    firstOutput.reserve(outputLen);
+    secondOutput.reserve(outputLen);
 
-    tom.randomize();
+    firstSDA.fillOutput(firstOutput, true, cout);
+    secondSDA.fillOutput(secondOutput, true, cout);
+
+    firstSDA.crossover(secondSDA);
+
+    firstSDA.fillOutput(firstOutput, true, cout);
+    secondSDA.fillOutput(secondOutput, true, cout);
     return 0;
 }
