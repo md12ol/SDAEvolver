@@ -204,9 +204,12 @@ int SDA::copy(SDA &other) {
 }
 
 /**
+ * Perform a two-point crossover between this SDA and the other SDA.  This will
+ * swap the transitions and responses of this SDA with the other SDA between two
+ * crossover points.  If state 0 is between these points then we also swap the
+ * initChar's of the SDAs.
  *
- *
- * @param other
+ * @param other The other SDA
  * @return
  */
 int SDA::crossover(SDA &other) {
@@ -235,16 +238,19 @@ int SDA::crossover(SDA &other) {
     vector<int> swapVec;
     swapVec.reserve(numChars);
 
+    // Determine the values for crossStart and crossEnd
     do {
-        crossStart = (int) lrand48() % (numStates + 1);
-        crossEnd = (int) lrand48() % (numStates + 1);
+        crossStart = (int) lrand48() % (numStates + 1); // 0 <= crossStart <= numStates
+        crossEnd = (int) lrand48() % (numStates + 1); // 0 <= crossEnd <= numStates
+        // Ensure that crossStart < crossEnd
         if (crossStart > crossEnd) {
             swapInt = crossStart;
             crossStart = crossEnd;
             crossEnd = swapInt;
         }
-    } while (crossStart == crossEnd);
+    } while (crossStart == crossEnd); // Ensure crossStart != crossEnd
 
+    // If crossing over state 0, also swap the initChar
     if (crossStart == 0) {
         swapInt = initChar;
         initChar = other.initChar;
@@ -252,7 +258,7 @@ int SDA::crossover(SDA &other) {
     }
 
     // This loop swaps the transitions and responses between this and the other SDA
-    // for the states with index in range [crossStart, crossEnd - 1]
+    // for the states with index between crossStart and crossEnd - 1, inclusively
     for (int state = crossStart; state < crossEnd; state++) {
         swapVec = transitions[state];
         transitions[state] = other.transitions[state];
