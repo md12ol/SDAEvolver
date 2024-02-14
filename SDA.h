@@ -10,6 +10,7 @@ class SDA {
 public:
     SDA();
     SDA(SDA &other);
+    // The equals sign after the arguments provides the default value for the parameters.
     explicit SDA(int numStates, int numChars, int maxRespLen, int outputLen, int initState = 0, bool verbose = false);
     ~SDA();
 
