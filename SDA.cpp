@@ -41,7 +41,7 @@ SDA::SDA(int numStates, int numChars, int maxRespLen, int outputLen, int initSta
         }
     }
     create();
-    if (verbose) cout << "SDA made with " << numStates << " numStates." << endl;
+    if (verbose) cout << "SDA made with " << numStates << " states." << endl;
 }
 
 /**
@@ -69,7 +69,7 @@ SDA::~SDA() = default;
  * This will randomly initialize the starting character for the SDA and randomly
  * generate the transitions and responses from each state.
  *
- * @return
+ * @return -1 if there is an error
  */
 int SDA::create() {
     initChar = (int) lrand48() % numChars; // Randomize the initial character that drives the first transition.
@@ -116,7 +116,7 @@ int SDA::setOutputLen(int newLen) {
  * Randomly re-generate the initial character and the transitions and responses from
  * each state in the SDA.
  *
- * @return
+ * @return -1 if there is an error
  */
 int SDA::randomize() {
     if (initChar < 0) {
@@ -151,8 +151,8 @@ int SDA::randomize() {
  * Facilitate the allocation of space and copying of contents from other
  * to this SDA.
  *
- * @param other The SDA being copied.
- * @return
+ * @param other The SDA being copied
+ * @return -1 if there is an error
  */
 int SDA::copy(SDA &other) {
     if (initChar < 0) {
@@ -206,11 +206,11 @@ int SDA::copy(SDA &other) {
 /**
  * Perform a two-point crossover between this SDA and the other SDA.  This will
  * swap the transitions and responses of this SDA with the other SDA between two
- * crossover points.  If state 0 is between these points then we also swap the
- * initChar's of the SDAs.
+ * crossover points, A and B, with A < B.  The states with index A to B-1 will
+ * be swapped.  If A is 0 then we also swap the initChar's of the SDAs.
  *
  * @param other The other SDA
- * @return
+ * @return -1 if there is an error
  */
 int SDA::crossover(SDA &other) {
     if (initChar < 0) {
@@ -269,9 +269,20 @@ int SDA::crossover(SDA &other) {
             other.responses[state][trans] = swapVec;
         }
     }
+
+    if (verbose) {
+        cout << "Completed crossover between two SDAs with crossover points ";
+        cout << crossStart << " and " << crossEnd << "." << endl;
+    }
     return 0;
 }
 
+/**
+ * KEVINDO: fill in
+ *
+ * @param numMuts
+ * @return
+ */
 int SDA::mutate(int numMuts) {
     if (initChar < 0) {
         cout << "Error in SDA Class: mutate(...): this SDA has not been initialized.";
@@ -284,20 +295,31 @@ int SDA::mutate(int numMuts) {
     for (int mut = 0; mut < numMuts; ++mut) {
         if (drand48() < 0.04) { // 4% chance of mutating initial character
             initChar = (int) lrand48() % numChars;
+            if (verbose) {
+                cout << "Completed mutation on the SDA's initial character."<< endl;
+            }
             return 0;
         } else {
             mutPt = (int) lrand48() % numStates;
             int transNum = (int) lrand48() % numChars;
 
-            if ((int) lrand48() % 2 == 0) { // Mutate transition (50%)
+            if ((int) lrand48() % 2 == 0) { // Mutate transition (48%)
                 transitions.at(mutPt).at(transNum) = (int) lrand48() % numStates;
-            } else { // Mutate response (50%)
+                if (verbose) {
+                    cout << "Completed mutation for state " << mutPt << ": ";
+                    cout << "New transition for character " << transNum << "." << endl;
+                }
+            } else { // Mutate response (48%)
                 oneResponse.clear();
                 respSize = (int) lrand48() % maxRespLen + 1;
                 for (int i = 0; i < respSize; ++i) {
                     oneResponse.push_back((int) lrand48() % numChars);
                 }
                 responses.at(mutPt).at(transNum) = oneResponse;
+                if (verbose) {
+                    cout << "Completed mutation for state " << mutPt << ": ";
+                    cout << "New response for character " << transNum << "."<< endl;
+                }
             }
         }
     }
@@ -345,6 +367,13 @@ vector<int> SDA::rtnOutput(bool printToo, ostream &outStream) {
     return output;
 }
 
+/**
+ * Print out the SDA to the provided ostream.  This will include the initial state,
+ * initial character, and the transitions and responses on all of the states.
+ *
+ * @param to Where the SDA will be printed to
+ * @return -1 if there is an error
+ */
 int SDA::print(ostream &to = cout) {
     if (initChar < 0) {
         cout << "Error in SDA Class: print(...): this SDA has not been initialized.";
