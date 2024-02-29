@@ -5,24 +5,124 @@ using namespace std;
 
 double calcFitness(SDA &member);
 int printPopFits(ostream &outStrm, vector<double> &popFits);
+bool compareFitness(int popIdx1, int popIdx2);
+vector<int> tournSelect(int size, bool decreasing);
+int matingEvent(SDA* population);
 
 int SDANumChars = 2;
 int SDAResponseLength = 2;
+int popSize;
+int tournSize;
+bool lowerBetter = false;
+int maximumNumMuts = 10;
 
-int evolver(int popsize, int SDANumStates, int SDAOutputLen){
+vector <double> popFits;
+
+
+int evolver(int SDANumStates, int SDAOutputLen, int numGenerations){
     SDA* population;
-    population = new SDA[popsize];
-    vector <double> popFits(popsize);
+    population = new SDA[popSize];
+    popFits.reserve(popSize);
 
-    for (int i = 0; i < popsize; ++i) {
+    // Step 1: initialize the population
+    for (int i = 0; i < popSize; ++i) {
         population[i] = SDA(SDANumStates, SDANumChars, SDAResponseLength, SDAOutputLen);
         popFits[i] = calcFitness(population[i]);
     }
 
     printPopFits(cout, popFits);
 
+    // Step 2: Evolution
+    for (int gen = 0; gen < numGenerations; ++gen) {
+        matingEvent(population);
+    }
+
+    // Step 3: Reporting
+
     delete[] population;
     return 0;
+}
+
+/**
+ * Performs a single mating event in the population by performing tournament selection,
+ * crossover on copies of the two most-fit members of the tournament, and mutation of these
+ * copies.  Afterwards, the two least-fit members of the tournament are replaced with
+ * the mutated children.
+ *
+ * @param population the population undergoing evolution
+ * @return
+ */
+int matingEvent(SDA* population){
+    // Tournament Selection
+    vector<int> tournIdxs = tournSelect(tournSize, lowerBetter);
+    SDA parent1, parent2, child1, child2;
+    parent1 = population[tournIdxs[0]];
+    parent2 = population[tournIdxs[1]];
+    child1.copy(parent1);
+    child2.copy(parent2);
+
+    // Crossover
+    child1.crossover(child2);
+
+    // Mutation
+    int numMuts;
+    numMuts = (int) lrand48() % maximumNumMuts;
+    child1.mutate(numMuts);
+    numMuts = (int) lrand48() % maximumNumMuts;
+    child1.mutate(numMuts);
+}
+
+/**
+ * KEVINDO: fill in
+ *
+ * @param size
+ * @param decreasing
+ * @return a vector of indices for members of the population sorted based on fitness
+ */
+vector<int> tournSelect(int size, bool decreasing) {
+    vector<int> tournIdxs;
+    int idxToAdd;
+
+    tournIdxs.reserve(size);
+    // If we want to sort the population, we call tournSelect with size == popsize
+    if (size == popSize) {
+        for (int idx = 0; idx < size; idx++) {
+            tournIdxs.push_back(idx);
+        }
+    } else {
+        do {
+            idxToAdd = (int) lrand48() % popSize;
+            // If this index is not already in tournIdxs
+            if (count(tournIdxs.begin(), tournIdxs.end(), idxToAdd) == 0) {
+                // Then add it
+                tournIdxs.push_back(idxToAdd);
+            }
+        } while (tournIdxs.size() < size);
+    }
+
+    sort(tournIdxs.begin(), tournIdxs.end(), compareFitness);
+    if (decreasing) {
+        reverse(tournIdxs.begin(), tournIdxs.end());
+    }
+    return tournIdxs;
+}
+
+/**
+ * KEVINDO: fill in
+ *
+ * @param popIdx1
+ * @param popIdx2
+ * @return
+ */
+bool compareFitness(int popIdx1, int popIdx2) {
+    if (popFits[popIdx1] < popFits[popIdx2]) {
+        return true;
+    }
+    if (popFits[popIdx1] > popFits[popIdx2]) {
+        return false;
+    }
+    cout << "ERROR: compare fitness not working as intended!" << endl;
+    return false;
 }
 
 double calcFitness(SDA &member){
