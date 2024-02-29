@@ -278,8 +278,9 @@ int SDA::crossover(SDA &other) {
 }
 
 /**
- * This method mutates the structure of the SDA, it will either mutate the inital character of the SDA as one of it mutations 
- * or it will have a choice of mutating a transition or response in the SDA as one of its mutations.
+ * This method mutates the structure of the SDA by performing numMuts number of mutations.  Each mutation
+ * will either mutate the initial character of the SDA (4% likelihood) or it will randomly mutate a transition
+ * (48% likelihood) or response in the SDA (48% likelihood).
  *
  * @param numMuts is the number of mutations that will occur
  * @return
