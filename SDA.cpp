@@ -278,9 +278,10 @@ int SDA::crossover(SDA &other) {
 }
 
 /**
- * KEVINDO: fill in
+ * This method mutates the strucuture of the SDA, it will either mutate the inital character of the SDA as one of it mutations 
+ * or it will have a choice of mutating a transition or response in the SDA as one of its mutations.
  *
- * @param numMuts
+ * @param numMuts is the number of mutations that will occur
  * @return
  */
 int SDA::mutate(int numMuts) {
