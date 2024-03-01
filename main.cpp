@@ -1,5 +1,6 @@
 #include <iostream>
 #include "SDA.h"
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -73,10 +74,12 @@ int matingEvent(SDA* population){
 }
 
 /**
- * KEVINDO: fill in
+ * Performs a tournament selection deciding which members from the population, of the 
+ * current generation, will undergo a mating event to produce the children that will 
+ * populate the new population for the next generation
  *
- * @param size
- * @param decreasing
+ * @param size of the returned vector of indicies from the tournament selection
+ * @param decreasing is a boolean determining the ordering of the indicies in the returned vector based on their fitness
  * @return a vector of indices for members of the population sorted based on fitness
  */
 vector<int> tournSelect(int size, bool decreasing) {
@@ -108,11 +111,12 @@ vector<int> tournSelect(int size, bool decreasing) {
 }
 
 /**
- * KEVINDO: fill in
+ * This method compares the fitness of two members of the population and returns a boolean determining
+ * which member had the greatest fitness
  *
- * @param popIdx1
- * @param popIdx2
- * @return
+ * @param popIdx1 an index representing a member of the population
+ * @param popIdx2 a second index representing a member of the population whos fitness is being compared to the previous member
+ * @return a boolean determing which member had the greatest fitness
  */
 bool compareFitness(int popIdx1, int popIdx2) {
     if (popFits[popIdx1] < popFits[popIdx2]) {
