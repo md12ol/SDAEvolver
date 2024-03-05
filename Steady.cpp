@@ -20,7 +20,7 @@ int numMutations = 1;
 
 vector <double> popFits;
 
-int evolver(int SDANumStates, int SDAOutputLen, int numGenerations){
+int evolver(int SDANumStates, int SDAOutputLen, int numMatingEvents){
     SDA* population;
     population = new SDA[popSize];
     popFits.reserve(popSize);
@@ -34,11 +34,12 @@ int evolver(int SDANumStates, int SDAOutputLen, int numGenerations){
     printPopFits(cout, popFits);
 
     // Step 2: Evolution
-    for (int gen = 0; gen < numGenerations; ++gen) {
+    for (int gen = 0; gen < numMatingEvents; ++gen) {
         matingEvent(population);
     }
 
     // Step 3: Reporting
+    printReport(cout, popFits, population);
 
     delete[] population;
     return 0;
@@ -68,6 +69,14 @@ int matingEvent(SDA* population){
     // Mutation
     child1.mutate(numMutations);
     child1.mutate(numMutations);
+
+    // Update population with genrated children
+    population[tournIdxs[tournSize - 1]] = child1;
+    population[tournIdxs[tournSize - 2]] = child2;
+
+    // Update fitness of worst two members of the tournament
+    popFits[tournIdxs[tournSize-1]] = calcFitness(child1);
+    popFits[tournIdxs[tournSize-2]] = calcFitness(child2); 
 }
 
 /**
@@ -145,6 +154,36 @@ int printPopFits(ostream &outStrm, vector<double> &popFits) {
         first = false;
     }
     outStrm << "\n";
+    return 0;
+}
+
+/**
+ * This method prints out the information of the best SDA
+ * from the EA algorithm such as its fitness, the SDA, average fitness
+ * and the best netowrk layout (Will come later when heurestic is complete)
+ * 
+ * @param outStrm is the designated output stream for the report
+ * @param popFits is the vector holding the firness for the population
+ * @param population is the population produced by the Genetic Algorithm
+ * @return 
+*/
+
+int printReport(ostream &outStrm, vector<double> &popFits, SDA* population){
+    double avgFit = 0;// Holds the average fitness
+    int bestIdx = 0;// Stores the best member of populations location
+
+    for (int x = 0; x < popFits.size(); x++){// For each entry
+        avgFit += popFits[x];// Add to average sum
+        if(popFits[bestIdx] < popFits[x]) bestIdx = x;// Get best population index
+    }
+
+    // Report the best SDA from GA
+    outStrm << "Mutation Rate: " << mutationRate * 100 << "%" << endl;
+    outStrm << "Best SDA: " << population[bestIdx].print(outStrm) << endl;
+    outStrm << "Best Layout: " << "Coming Soon" << endl;
+    outStrm << "Best Fitness: " << popFits[bestIdx] << endl;
+    outStrm << "Average Fitness: " << avgFit/popFits.size() << endl;
+
     return 0;
 }
 
