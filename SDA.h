@@ -20,6 +20,8 @@ public:
     int mutate(int numMuts);
     int print(ostream &to);
     bool operator!=(SDA &other);
+    bool operator==(SDA &other);
+    vector<vector<vector<int> > > getResponses();
 
     int setOutputLen(int newLen);
     int fillOutput(vector<int> &output, bool printToo, ostream &outStream);

@@ -107,6 +107,10 @@ int SDA::create() {
     return 0;
 }
 
+vector<vector<vector<int>>> SDA::getResponses(){
+    return this->responses;
+}
+
 int SDA::setOutputLen(int newLen) {
     this->outputLen = newLen;
     return 0;
@@ -358,12 +362,36 @@ int SDA::fillOutput(vector<int> &output, bool printToo, ostream &outStream) {
     return 0;
 }
 
+/**
+ * Determines if this SDA and the other SDA are different from each other.
+ *
+ * @param other the SDA being compared to
+ * @return true if different
+ */
 bool SDA::operator!=(SDA &other) {
     if (initChar != other.initChar) return true;
     if (numStates != other.numStates) return true;
     if (initState != other.initState) return true;
     if (curState != other.curState) return true;
+    if (numChars != other.numChars) return true;
+    if (maxRespLen != other.maxRespLen) return true;
+    if (outputLen != other.outputLen) return true;
+    if (verbose != other.verbose) return true;
+    if (transitions != other.transitions) return true;
+    if (responses != other.responses) return true;
     return false;
+}
+
+/**
+ * Determines if this SDA and the other SDA are identical.
+ *
+ * @param other the SDA being compared to
+ * @return true if identical
+ */
+bool SDA::operator==(SDA &other){
+    SDA first(*this);
+    SDA second(other);
+    return !(first != second);
 }
 
 vector<int> SDA::rtnOutput(bool printToo, ostream &outStream) {
