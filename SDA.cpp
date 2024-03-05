@@ -298,7 +298,7 @@ int SDA::mutate(int numMuts) {
         if (drand48() < 0.04) { // 4% chance of mutating initial character
             initChar = (int) lrand48() % numChars;
             if (verbose) {
-                cout << "Completed mutation on the SDA's initial character."<< endl;
+                cout << "Completed mutation on the SDA's initial character." << endl;
             }
             return 0;
         } else {
@@ -320,7 +320,7 @@ int SDA::mutate(int numMuts) {
                 responses.at(mutPt).at(transNum) = oneResponse;
                 if (verbose) {
                     cout << "Completed mutation for state " << mutPt << ": ";
-                    cout << "New response for character " << transNum << "."<< endl;
+                    cout << "New response for character " << transNum << "." << endl;
                 }
             }
         }
@@ -356,6 +356,14 @@ int SDA::fillOutput(vector<int> &output, bool printToo, ostream &outStream) {
     }
     if (printToo) outStream << endl;
     return 0;
+}
+
+bool SDA::operator!=(SDA &other) {
+    if (initChar != other.initChar) return true;
+    if (numStates != other.numStates) return true;
+    if (initState != other.initState) return true;
+    if (curState != other.curState) return true;
+    return false;
 }
 
 vector<int> SDA::rtnOutput(bool printToo, ostream &outStream) {

@@ -19,6 +19,7 @@ public:
     int crossover(SDA &other);
     int mutate(int numMuts);
     int print(ostream &to);
+    bool operator!=(SDA &other);
 
     int setOutputLen(int newLen);
     int fillOutput(vector<int> &output, bool printToo, ostream &outStream);
