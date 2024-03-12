@@ -1,5 +1,5 @@
-#ifndef Nodes_H
-#define Nodes_H
+#ifndef EdgeNode_H
+#define EdgeNode_H
 
 #include <iostream>
 #include <vector>
@@ -8,11 +8,11 @@
 
 using namespace std;
 
-class Nodes {
+class EdgeNode {
 public:
-    Nodes();
+    EdgeNode();
 
-    explicit Nodes(int type, bool admin);
+    explicit EdgeNode(int type);
 
 private:
     void desktop();// four computers
@@ -22,4 +22,4 @@ private:
     void website();// one website
 };
 
-#endif // Nodes_H
+#endif // EdgeNodes_H
