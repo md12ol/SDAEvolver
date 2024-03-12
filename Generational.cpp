@@ -187,6 +187,7 @@ bool compareFitness(int popIdx1, int popIdx2) {
 double calcFitness(SDA &member){
     // KEVINDO: (Later) complete fitness functions.
 
+    // Temporary fitness function to test the evolutionary algorithm
     int val = 0;
     for (vector<vector<int>> stateResp : member.getResponses()){
         for (vector<int> transResp: stateResp){
