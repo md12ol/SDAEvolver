@@ -1,17 +1,21 @@
 #include <iostream>
 #include "SDA.h"
+#include "Topology.h"
 #include <bits/stdc++.h>
 
 using namespace std;
 
-int main() {
-    return 0;
-}
-
 void testing(){
-        int outputLen = 20;
+
+    int outputLen = 20;
     int numStates = 3;
     int numChars = 2;
+
+    cout << "stuff worked" << endl;
+
+    Topology T;
+
+    exit(1);
 
     SDA firstSDA(numStates, numChars, 2, outputLen, 0, true);
     SDA secondSDA(numStates, numChars, 2, outputLen, 0, true);
@@ -44,4 +48,9 @@ void testing(){
     cout << "Second SDA:" << endl;
     secondSDA.print(cout);
     secondSDA.fillOutput(secondOutput, true, cout);
+}
+
+int main() {
+    testing();
+    return 0;
 }
