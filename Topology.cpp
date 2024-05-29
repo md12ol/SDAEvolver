@@ -8,28 +8,15 @@
 Topology::Topology(int x, int y, int starts, int ends, int numNodes){
 
     network.reserve(y);
-    for (vector<bool> v: network) {
-        v.reserve(x);
-        v = {false};
-    }
-
-    cout << "Works" << endl;
-
-    PrintLayout();
-
-    cout << "Works1" << endl;
-
+    vector<bool> temp;
+    temp.reserve(x);
+    for (int i = 0; i < y; i++) temp.push_back(false);
+    for (int i = 0; i < y; i++) network.push_back(temp);
+        
     ChooseStart(y, starts);
-
-    cout << "Works2" << endl;
-
     ChooseEnd(y, ends);
-
-    cout << "Works3" << endl;
-
     ChooseNodeLocations(x, y, numNodes);
-
-    cout << "Works4" << endl;
+    PrintLayout();
 }
 
 void Topology::PrintLayout(){
@@ -73,8 +60,8 @@ int Topology::ChooseEnd(int y, int numEnds){
         int end;
         do{
             end = (int)lrand48() % y; // randomly choose the data starting position in the network
-        } while (network[y][end] == true); // if position was already choosen choose another
-        network[y][end] = true;
+        } while (network[y-1][end] == true); // if position was already choosen choose another
+        network[y-1][end] = true;
     }
     return 0;
 }
@@ -84,12 +71,12 @@ int Topology::ChooseEnd(int y, int numEnds){
 */
 
 void Topology::ChooseNodeLocations(int x, int y, int numNodes){
-    for (int x = 0; x < numNodes; x++){
+    for (int z = 0; z < numNodes; z++){
         int row;
         int column;
         do{
             row = (int)lrand48() % y; // randomly choose row to insert node
-            column = (int)lrand48() % x;// randmoly choose column to insert node
+            column = (int)lrand48() % x;// randomly choose column to insert node
         } while (network[row][column] == true); // if position is already choosen choose another
         network[row][column] = true;
     }

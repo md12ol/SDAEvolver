@@ -1,6 +1,6 @@
 #include "FogNode.h"
-map<int, vector<string>> security;      // defines if a security protocol is active in the node
-map<string, vector<string>> vulnerabilites;// defines if an attack is executable on a node
+static map<int, vector<string>> security;      // defines if a security protocol is active in the node
+static map<string, vector<string>> vulnerabilites;// defines if an attack is executable on a node
 
 /**
  * Constructor for the Nodes objects contained with the network strucutre
