@@ -11,6 +11,11 @@ class Topology {
         int ShortestPath(int position, vector<double> &sPath);
         void setConnections(vector<int> c);
 
+        vector<vector<bool>> network;
+        static int numNodes;// variable representing number of fog layer nodes present in the network
+        static int numCNodes;// varialbe representing total number of cloud nodes in the topology
+        static int tNumNodes;// variable representing total number of nodes in the network
+
     private:
         void PrintLayout();
         int ChooseStart(int x, int numStarts);
@@ -18,11 +23,11 @@ class Topology {
         void ChooseNodeLocations(int x, int y, int numNodes);
         void findNode(int &x, int &y, int node);
         
-        static int numNodes;// variable representing number of fog layer nodes present in the network
+        
 
         /**
          * The layout of the network that the program will attempt to find the optimal configuration for
          */
-        vector<vector<bool>> network;
+        
         vector<vector<int>> connections;
 };
