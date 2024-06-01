@@ -1,5 +1,6 @@
 #include <iostream>
 #include "SDA.h"
+#include "Topology.h"
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -21,6 +22,8 @@ bool genLowerBetter = false;
 double genMutationRate = 0.1;
 int numGenerations = 100;
 int genNumMutations = 1;
+static int numConnections = 40;// defines the number of connnections the network will possess
+static Topology T;//
 
 vector<double> genPopFits;
 
@@ -142,15 +145,24 @@ bool genCompareFitness(int popIdx1, int popIdx2) {
     return false;
 }
 
-double genCalcFitness(SDA &member){
-    // KEVINDO: (Later) complete fitness functions.
+double genCalcFitness(SDA &member){//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    // Temporary fitness function to test the evolutionary algorithm
+    vector<int> c;// vector for holding response from SDA
+    member.fillOutput(c, false, cout);// fill vector using SDA
+    T.setConnections(c);//set the connections in the topology
+
+    // Fitness function sums all distances an edge node uses to reach a cloud node through topology
     int val = 0;
-    for (vector<vector<int>> stateResp : member.getResponses()){
-        for (vector<int> transResp: stateResp){
-            for (int resp: transResp){
-                val += resp;
+    for (int x = 0; x < T.network.size(); x++){
+        if (T.network[0][x] == true){ // if there is an edge node at that position
+            vector<double> sPath;// create vector to record distance from edge node to all other nodes
+            sPath.reserve(T.tNumNodes);
+            sPath.assign(T.tNumNodes, DBL_MAX); // set all values to max double value
+            sPath[x] = 0;// set distance to starting edge node to zero
+            T.ShortestPath(x, sPath);// calculate shortest path to all nodes in topology from selected edge node
+
+            for (int i = 0; i < T.numCNodes; i++){
+                val += sPath[T.tNumNodes - 1 - i];
             }
         }
     }
@@ -182,6 +194,7 @@ int genEvolver(int SDANumStates, int SDAOutputLen, int numGenerations) {
     currentPop = new SDA[genPopSize];
     newPop = new SDA[genPopSize];
     genPopFits.reserve(genPopSize);
+    Topology T;// initialize the topology of the network
 
     // Step 1: initialize the population
     for (int i = 0; i < genPopSize; ++i) {
@@ -220,6 +233,7 @@ int genEvolver(int SDANumStates, int SDAOutputLen, int numGenerations) {
 }
 
 int Generational() {
+
     genEvolver(100, 10, 20);
     return 0;
 }
