@@ -14,7 +14,8 @@ class Topology {
         vector<vector<bool>> network;
         static int numNodes;// variable representing number of fog layer nodes present in the network
         static int numCNodes;// varialbe representing total number of cloud nodes in the topology
-        static int tNumNodes;// variable representing total number of nodes in the network
+        static int numENodes;
+        static int tNumNodes; // variable representing total number of nodes in the network
 
     private:
         void PrintLayout();

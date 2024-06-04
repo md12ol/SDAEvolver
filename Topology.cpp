@@ -12,7 +12,8 @@ Topology::Topology(int x, int y, int starts, int ends, int numNodes){
     this->network = network;
     this->numNodes = numNodes;
     this->numCNodes = ends;
-    this->tNumNodes = numNodes + ends + starts;// calculate number of nodes in Topology
+    this->numENodes = starts;
+    this->tNumNodes = numNodes + ends + starts; // calculate number of nodes in Topology
 
     srand(time(0));
 
