@@ -20,31 +20,6 @@ int numMutations = 1;
 
 vector <double> popFits;
 
-int evolver(int SDANumStates, int SDAOutputLen, int numMatingEvents){
-    SDA* population;
-    population = new SDA[popSize];
-    popFits.reserve(popSize);
-
-    // Step 1: initialize the population
-    for (int i = 0; i < popSize; ++i) {
-        population[i] = SDA(SDANumStates, SDANumChars, SDAResponseLength, SDAOutputLen);
-        popFits[i] = calcFitness(population[i]);
-    }
-
-    printPopFits(cout, popFits);
-
-    // Step 2: Evolution
-    for (int gen = 0; gen < numMatingEvents; ++gen) {
-        matingEvent(population);
-    }
-
-    // Step 3: Reporting
-    printReport(cout, popFits, population);
-
-    delete[] population;
-    return 0;
-}
-
 /**
  * Performs a single mating event in the population by performing tournament selection,
  * crossover on copies of the two most-fit members of the tournament, and mutation of these
@@ -76,7 +51,9 @@ int matingEvent(SDA* population){
 
     // Update fitness of worst two members of the tournament
     popFits[tournIdxs[tournSize-1]] = calcFitness(child1);
-    popFits[tournIdxs[tournSize-2]] = calcFitness(child2); 
+    popFits[tournIdxs[tournSize-2]] = calcFitness(child2);
+
+    return 0;
 }
 
 /**
@@ -187,7 +164,32 @@ int printReport(ostream &outStrm, vector<double> &popFits, SDA* population){
     return 0;
 }
 
-int main() {
-    evolver(100, 10, 20);
+int steEvolver(int SDANumStates, int SDAOutputLen, int numMatingEvents){
+    SDA* population;
+    population = new SDA[popSize];
+    popFits.reserve(popSize);
+
+    // Step 1: initialize the population
+    for (int i = 0; i < popSize; ++i) {
+        population[i] = SDA(SDANumStates, SDANumChars, SDAResponseLength, SDAOutputLen);
+        popFits[i] = calcFitness(population[i]);
+    }
+
+    printPopFits(cout, popFits);
+
+    // Step 2: Evolution
+    for (int gen = 0; gen < numMatingEvents; ++gen) {
+        matingEvent(population);
+    }
+
+    // Step 3: Reporting
+    printReport(cout, popFits, population);
+
+    delete[] population;
+    return 0;
+}
+
+int Steady() {
+    steEvolver(100, 10, 20);
     return 0;
 }
