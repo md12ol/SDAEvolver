@@ -1,31 +1,4 @@
-#include <iostream>
-#include "SDA.h"
-#include "Topology.h"
-#include <bits/stdc++.h>
-
-using namespace std;
-
-double genCalcFitness(SDA &member);
-int genPrintPopFits(ostream &outStrm, vector<double> &popFits);
-bool genCompareFitness(int popIdx1, int popIdx2);
-vector<int> genTournSelect(int size, bool decreasing);
-int genMatingEvent(SDA *currentPop, SDA *newPop);
-
-int genSDANumChars = 2;
-int genSDAResponseLength = 2;
-int genPopSize = 100;
-int genTournSize = 7;
-int tournCandidates = 4;
-int tournMaxRepeats = 10;
-int elitism = 2;
-bool genLowerBetter = false;
-double genMutationRate = 0.1;
-int numGenerations = 100;
-int genNumMutations = 1;
-static int numConnections = 40;// defines the number of connnections the network will possess
-static Topology T;//
-
-vector<double> genPopFits;
+#include "Generational.h"
 
 /**
  * Generates the next generation's population by performing tournament selection on currentPop,
@@ -36,7 +9,7 @@ vector<double> genPopFits;
  * @param newPop the next generation's population
  * @return
  */
-int genMatingEvent(SDA *currentPop, SDA *newPop) {
+int Generational::genMatingEvent(SDA *currentPop, SDA *newPop) {
     // Tournament Selection
     vector<int> tournIdxs = genTournSelect(genTournSize, genLowerBetter);
     SDA parent1, parent2, child1, child2;
@@ -80,7 +53,7 @@ int genMatingEvent(SDA *currentPop, SDA *newPop) {
  * @param decreasing is a boolean determining the ordering of the indices in the returned vector based on their fitness
  * @return a vector of indices for members of the population sorted based on fitness
  */
-vector<int> genTournSelect(int size, bool decreasing) {
+vector<int> Generational::genTournSelect(int size, bool decreasing) {
     vector<int> tournIdxs;
     int idxToAdd, idxToCheck;
 
@@ -118,9 +91,10 @@ vector<int> genTournSelect(int size, bool decreasing) {
     }
 
     // Sort the indexes, default is ascending
-    sort(tournIdxs.begin(), tournIdxs.end(), genCompareFitness);
+    //sort(tournIdxs.begin(), tournIdxs.end(), genCompareFitness);
+    sort(tournIdxs.begin(), tournIdxs.end());
     // Flip the sort to descending
-    if (decreasing) {
+    if (decreasing){
         reverse(tournIdxs.begin(), tournIdxs.end());
     }
     return tournIdxs;
@@ -134,7 +108,7 @@ vector<int> genTournSelect(int size, bool decreasing) {
  * @param popIdx2 a second index representing a member of the population whos fitness is being compared to the previous member
  * @return a boolean determing which member had the greatest fitness
  */
-bool genCompareFitness(int popIdx1, int popIdx2) {
+bool Generational::genCompareFitness(int popIdx1, int popIdx2) {
     if (genPopFits[popIdx1] <= genPopFits[popIdx2]) {
         return true;
     }
@@ -145,38 +119,39 @@ bool genCompareFitness(int popIdx1, int popIdx2) {
     return false;
 }
 
-double genCalcFitness(SDA &member){//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+double Generational::genCalcFitness(SDA &member){
 
-    vector<int> c;// vector for holding response from SDA
+    int outputLen = (T.tNumNodes*(T.tNumNodes-1))/2;
+    vector<int> c(outputLen);// vector for holding response from SDA
     member.fillOutput(c, false, cout);// fill vector using SDA
-    T.setConnections(c);//set the connections in the topology
+    T.setConnections(c, true);//set the connections in the topology
 
     // Fitness function sums all distances an edge node uses to reach a cloud node through topology
     int val = 0;
-    for (int x = 0; x < T.network.size(); x++){
-        if (T.network[0][x] == true){ // if there is an edge node at that position
-            vector<double> sPath;// create vector to record distance from edge node to all other nodes
-            sPath.reserve(T.tNumNodes);
-            sPath.assign(T.tNumNodes, DBL_MAX); // set all values to max double value
-            sPath[x] = 0;// set distance to starting edge node to zero
-            T.ShortestPath(x, sPath);// calculate shortest path to all nodes in topology from selected edge node
-            
-            for (int i = 0; i < T.numCNodes; i++){
-                int dist = 0;// total distance from edge node to cloud node
-                int count = 0;// number of cloud nodes edge node connects to
-                if(sPath[T.tNumNodes - 1 - i] < DBL_MAX){// if there exists a path from the edge node to cloud node
-                    dist += sPath[T.tNumNodes - 1 - i];// add distance
-                    count++;// increment connection count
-                }
-                val += dist / count;// add average connection distance to total distance value
+    for (int x = 0; x < T.numENodes; x++){// for each edge node
+        vector<double> sPath;// create vector to record distance from edge node to all other nodes
+        sPath.reserve(T.tNumNodes);
+        sPath.assign(T.tNumNodes, DBL_MAX); // set all values to max double value
+        sPath[x] = 0;// set distance to starting edge node to zero
+        T.ShortestPath(x, sPath);// calculate shortest path to all nodes in topology from selected edge node
+
+        for (int s:sPath) cout << to_string(s) + '\t';//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        cout << endl;
+
+        int count = 0;// number of cloud nodes edge node connects to
+        int dist = 0;// total distance from edge node to cloud node
+        for (int i = 0; i < T.numCNodes; i++){
+            if(sPath[T.tNumNodes - 1 - i] < DBL_MAX){// if there exists a path from the edge node to cloud node
+                dist += sPath[T.tNumNodes - 1 - i];// add distance
+                count++;// increment connection count
             }
-            
-        }
+          }
+        if(count != 0) val += dist / count;// add average connection distance to total distance value
     }
     return val/T.numENodes;// return the average distance from all edge nodes to a cloud node
 }
 
-int genPrintPopFits(ostream &outStrm, vector<double> &popFits) {
+int Generational::genPrintPopFits(ostream &outStrm, vector<double> &popFits) {
     outStrm << "Fitness Values: ";
     int count = 0;
     bool first = true;
@@ -196,7 +171,7 @@ int genPrintPopFits(ostream &outStrm, vector<double> &popFits) {
     return 0;
 }
 
-int genEvolver(int SDANumStates, int SDAOutputLen, int numGenerations) {
+int Generational::genEvolver(int SDANumStates, int SDAOutputLen, int numGenerations) {
     SDA *currentPop, *newPop;
     currentPop = new SDA[genPopSize];
     newPop = new SDA[genPopSize];
@@ -239,8 +214,8 @@ int genEvolver(int SDANumStates, int SDAOutputLen, int numGenerations) {
     return 0;
 }
 
-int Generational() {
-
-    genEvolver(100, 10, 20);
-    return 0;
+Generational::Generational() {
+    Topology T(5,5,1,1,3);
+    this->T = T;
+    // genEvolver();
 }

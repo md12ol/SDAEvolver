@@ -24,12 +24,28 @@ Topology::Topology(int x, int y, int starts, int ends, int numNodes){
 }
 
 void Topology::PrintLayout(){
-    for (int y = 0; y < network.size(); y++){
+    int nodeID = 1;
+    for (int y = 0; y < network.size(); y++)
+    {
         for (int x = 0; x < network[0].size(); x++){
-            cout << network[y][x] << '\t';
+            if(network[y][x] == 1){
+                cout << nodeID << '\t';
+                nodeID++;
+            }else cout << network[y][x] << '\t';
         }
         cout << '\n';
     }
+    cout << "Topology" << endl;
+}
+
+void Topology::printConnections(){
+    for (int y = 0; y < connections.size(); y++){
+        for (int x = 0; x < connections[0].size(); x++){
+            cout << connections[y][x] << ' ';
+        }
+        cout << '\n';
+    }
+    cout << "Connections" << endl;
 }
 
 /**
@@ -62,7 +78,7 @@ int Topology::ChooseStart(int x, int numStarts){
 */
 
 int Topology::ChooseEnd(int y, int x, int numEnds){
-    for (int x = 0; x < numEnds; x++){
+    for (int i = 0; i < numEnds; i++){
         int end;
         do{
             end = rand() % x; // randomly choose the data starting position in the network
@@ -85,8 +101,8 @@ void Topology::ChooseNodeLocations(int x, int y, int numNodes){
         int row;
         int column;
         do{
-            row = 1 + (int)lrand48() % (y-2); // randomly choose row between 1-8 to insert node
-            column = (int)lrand48() % x;// randomly choose column to insert node
+            row = 1 + rand() % (y-2); // randomly choose row between 1-8 to insert node
+            column = rand() % x;// randomly choose column to insert node
         } while (network[row][column] == true); // if position is already choosen choose another
         network[row][column] = true;
     }
@@ -96,22 +112,34 @@ void Topology::ChooseNodeLocations(int x, int y, int numNodes){
  * This method calculates the shortest path (i.e. euclidean distance) between two nodes in
  * the network topology
  * 
- * @param position is the node we are starting from in the network
+ * @param position is the node being travelled from currently
  * @param sPath is the shortest path from the start node to any other node in the network it has a path to
 */
 
-int Topology::ShortestPath(int position, vector<double> &sPath){// initialize distance from start node to all others at max value){
+int Topology::ShortestPath(int position, vector<double> &sPath){// initialize distance from start node to all others at max value)
 
-    for (int x = 0; x < connections[position].size(); x++){ // go through the row recording the connections for the current position
-        if (connections[position][x] == true){ // if there is a connection to explore
+    for (int x = 0; x < position; x++){ // go through the row recording the connections for the current position
+        if (connections[position][x] == 1){ // if there is a connection to explore
+            int x1, x2, y1, y2;
+            findNode(x1, y1, position + 1); // find x and y co-ordinate of node we are at
+            findNode(x2, y2, x + 1); // find x and y co-ordinate of node we wish to calculate distance to
+            int dist = sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2)); // caluclate euclidean distance
+            if (dist + sPath[position] < sPath[x]){// compare distance
+                sPath[x] = dist + sPath[position]; // if shorter path update distance in shorter path vector
+                ShortestPath(x, sPath);// recalculate distance to all other nodes from that node to find shorter paths
+                }
+            }
+        }
+
+    for (int y = position + 1; y < connections.size(); y++){// go through the coloumn recording the connections for the current position
+        if (connections[y][position] == 1){ // if there is a connection to explore
             int x1, x2, y1, y2;
             findNode(x1, y1, position + 1);// find x and y co-ordinate of node we are at
-            findNode(x2, y2, x + 1);// find x and y co-ordinate of node we wish to calculate distance to
-
+            findNode(x2, y2, y + 1);// find x and y co-ordinate of node we wish to calculate distance to
             int dist = sqrt(pow((x2 - x1),2) + pow((y2 - y1),2));//caluclate euclidean distance
-            if(dist + sPath[position] < sPath[x]){// compare distance
-                sPath[x] = dist + sPath[position];// if shorter path update distance in shorter path vector
-                ShortestPath(x, sPath);// recalculate distance to all other nodes from that node to find shorter paths
+            if(dist + sPath[position] < sPath[y]){// compare distance
+                sPath[y] = dist + sPath[position];// if shorter path update distance in shorter path vector
+                ShortestPath(y, sPath);// recalculate distance to all other nodes from that node to find shorter paths
             } 
         }
     }
@@ -130,9 +158,9 @@ int Topology::ShortestPath(int position, vector<double> &sPath){// initialize di
 void Topology::findNode(int &x, int &y, int node){
     int count = 0;// keep track of what node we have found in the network
     for (y = 0; y < network.size(); y++){// select row we will look through
-        for (int x = 0; x < network[0].size() ; x++){// select column
+        for (x = 0; x < network[0].size(); x++){// select column
             if(network[y][x] == true) count++;// if there is a node at position increment count
-            if(count == node)return;// if found the node return to call
+            if(count == node) return;// if found the node return to call
         }
     }
 }
@@ -144,18 +172,23 @@ void Topology::findNode(int &x, int &y, int node){
  * @param c is the vector produced by the SDA detainling the connections present in the network
 */
 
-void Topology::setConnections(vector<int> c){
-    vector<vector<int>> connections(numNodes, vector<int>(numNodes, 0));
+void Topology::setConnections(vector<int> c, bool verbose){
+    
+    vector<vector<int>> connections({{0,0,0,0,0},
+                                     {1,0,0,0,0},
+                                     {0,1,0,0,0},
+                                     {1,0,0,0,0},
+                                     {0,0,1,1,0}});
 
-    for (int x = 0; x < c.size(); x+2){
-        int start = c[x];// get the start node from the vector produced by the SDA
-        int des = c[x + 1];// get the destination node from the vector produced by the SDA
+    // vector<vector<int>> connections(tNumNodes, vector<int>(tNumNodes, 0));
+    // int pos = 0;// keep track of position in SDA connection vector
+    // for (int y = 1; y < connections.size(); y++){// fill th bottom left triangle of connection matrix
+    //     for (int x = 0; x < y; x++){
+    //         connections[y][x] = c[pos];
+    //         pos++;// increment position in SDA connection vector
+    //     }
+    // }
 
-        while(connections[start][des] == 1){// if there is already a connection between the nodes
-            start =(int)lrand48() % numNodes; // randomly choose a start node
-            des = (int)lrand48() % numNodes;// randomly choose end node
-        }
-        connections[start][des] = 1; // set connection status between nodes in network as true
-    }
     this->connections = connections;
+    if(verbose) printConnections();
 }
